@@ -40,13 +40,13 @@ public class LoginPage extends BasePage {
 
     public void fillData(String username, String password) {
         Logs.info("Escribiendo el username");
-        find(usernameInput).sendKeys(username);
+        type(usernameInput, username);
 
         Logs.info("Escribiendo el password");
-        find(passwordInput).sendKeys(password);
+        type(passwordInput, password);
 
         Logs.info("Haciendo click en el boton de login");
-        find(loginButton).click();
+        click(loginButton);
     }
 
 
@@ -55,13 +55,13 @@ public class LoginPage extends BasePage {
         Gestures.tap(find(standardUserLabel));
 
         Logs.info("Haciendo click en login");
-        find(loginButton).click();
+        click(loginButton);
     }
 
 
     public void verifyErrorMessage(String errorText) {
         Logs.info("Esperando que el mensaje de error aparezca");
-        final var errorMessageElement = waitForDisplayed(errorMessage, 3);
+        final var errorMessageElement = waitForDisplayed(errorMessage);
 
         Logs.info("Verificando el mensaje de error");
         Assertions.assertAll(

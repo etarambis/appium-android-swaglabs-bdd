@@ -4,58 +4,61 @@ package utilities;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 import io.cucumber.java.Scenario;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class FileManager {
 
-    private static final String screenshotsPath = "src/test/resources/screenshots/";
-    private static final String pageSourcePath  = "src/test/resources/pageStructure/";
+    private static final String screenshotsPath = Config.get("evidence.screenshots.dir");
+    private static final String pageSourcePath  = Config.get("evidence.pagesource.dir");
 
+
+    // La evidencia es secundaria: si falla, se registra y NO se lanza excepcion,
+    // para no ocultar el error real del escenario.
 
     public static void getScreenshot(String screenshotName) {
         Logs.debug("Tomando screenshot: " + screenshotName);
 
-        final var screenshotFile = ((TakesScreenshot) new DriverProvider().get())
-                .getScreenshotAs(OutputType.FILE);
+        final var driver = new DriverProvider().get();
+        if (driver == null) {
+            Logs.warning("No hay driver activo, no se puede tomar el screenshot");
+            return;
+        }
 
         final var path = String.format("%s/%s.png", screenshotsPath, screenshotName);
 
         try {
+            final var screenshotFile = driver.getScreenshotAs(OutputType.FILE);
             FileUtils.copyFile(screenshotFile, new File(path));
-        } catch (IOException ioExeption) {
-            Logs.error("Error al guardar el screenshot: %s", ioExeption.getLocalizedMessage());
-            throw new RuntimeException(ioExeption);
+        } catch (Exception exception) {
+            Logs.error("Error al guardar el screenshot: %s", exception.getLocalizedMessage());
         }
-
     }
 
     public static void getPageSource(String fileName) {
         Logs.debug("Guardando estructura de la página: " + fileName);
+
+        final var driver = new DriverProvider().get();
+        if (driver == null) {
+            Logs.warning("No hay driver activo, no se puede guardar el page source");
+            return;
+        }
+
         final var path = String.format("%s/%s.xml", pageSourcePath, fileName);
 
         try {
-            final var file = new File(path);
-            Logs.debug("Creando los directorios padres si es que no existen ");
-            if (file.getParentFile().mkdir()) {
-                final var fileWriter = new FileWriter(file);
-                final var pageSource = new DriverProvider().get().getPageSource();
-
-                if (pageSource != null) {
-                    fileWriter.write(Jsoup.parse(pageSource).toString());
-                }
-                fileWriter.close();
+            final var pageSource = driver.getPageSource();
+            if (pageSource == null) {
+                Logs.warning("El page source llego vacio, no se guarda el archivo");
+                return;
             }
-
-        } catch (IOException ioException) {
-
-            Logs.error("Error al tomar el page source: %s", ioException.getLocalizedMessage());
-            throw new RuntimeException(ioException);
-
+            // writeStringToFile crea los directorios padres si no existen
+            FileUtils.writeStringToFile(new File(path), Jsoup.parse(pageSource).toString(), StandardCharsets.UTF_8);
+        } catch (Exception exception) {
+            Logs.error("Error al tomar el page source: %s", exception.getLocalizedMessage());
         }
     }
 
@@ -73,24 +76,46 @@ public class FileManager {
     }
 
     public static void attachScreenshot(Scenario scenario) {
-        final var screenshotFile = ((TakesScreenshot) new DriverProvider().get())
-                .getScreenshotAs(OutputType.BYTES);
+        final var driver = new DriverProvider().get();
+        if (driver == null) {
+            Logs.warning("No hay driver activo, no se adjunta el screenshot");
+            return;
+        }
 
-        scenario.attach(
-                screenshotFile,
-                "image/png",
-                scenario.getName()
-        );
+        try {
+            final var screenshotFile = driver.getScreenshotAs(OutputType.BYTES);
+
+            scenario.attach(
+                    screenshotFile,
+                    "image/png",
+                    scenario.getName()
+            );
+        } catch (Exception exception) {
+            Logs.error("Error al adjuntar el screenshot: %s", exception.getLocalizedMessage());
+        }
     }
 
     public static void attachPageSource(Scenario scenario) {
-        final var pageSource = new DriverProvider().get().getPageSource();
-        final var parsedPageSource = Jsoup.parse(pageSource).toString();
+        final var driver = new DriverProvider().get();
+        if (driver == null) {
+            Logs.warning("No hay driver activo, no se adjunta el page source");
+            return;
+        }
 
-        scenario.attach(
-                parsedPageSource,
-                "text/plain",
-                scenario.getName()
-        );
+        try {
+            final var pageSource = driver.getPageSource();
+            if (pageSource == null) {
+                Logs.warning("El page source llego vacio, no se adjunta");
+                return;
+            }
+
+            scenario.attach(
+                    Jsoup.parse(pageSource).toString(),
+                    "text/plain",
+                    scenario.getName()
+            );
+        } catch (Exception exception) {
+            Logs.error("Error al adjuntar el page source: %s", exception.getLocalizedMessage());
+        }
     }
 }

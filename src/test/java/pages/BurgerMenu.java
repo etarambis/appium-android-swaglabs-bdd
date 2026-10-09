@@ -29,13 +29,13 @@ public class BurgerMenu extends BasePage {
 
     public void clickLogout(){
         Logs.info("haciendo click en el boton de logout");
-        find(logoutButton).click();
+        click(logoutButton);
     }
 
 
     public void clickCloseX(){
         Logs.info("haciendo click en la x");
-        find(closeButton).click();
+        click(closeButton);
     }
 
 }

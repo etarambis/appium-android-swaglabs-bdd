@@ -31,9 +31,7 @@ public class ItemDetailPage extends BasePage {
 
     @Override
     public void waitPageToLoad() {
-        //waitPage(canvas, this.getClass().getSimpleName());
-        waitForDisplayed(canvas, 20);
-        Logs.info("ItemDetailPage ha cargado satisfactoriamente");
+        waitPage(canvas, this.getClass().getSimpleName());
     }
 
     @Override
@@ -54,7 +52,7 @@ public class ItemDetailPage extends BasePage {
 
     public void clickBackProducts() {
         Logs.info("Haciendo click en back to products");
-        find(backProductsButton).click();
+        click(backProductsButton);
     }
 
     public void verifyItemInfo(String itemName, double expectedPrice) {

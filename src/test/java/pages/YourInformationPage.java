@@ -35,26 +35,24 @@ public class YourInformationPage extends BasePage {
     public void fillData(String name, String lastname, String zipcode) {
         if (!name.isEmpty()) { //si el name es vacio no se escribe
             Logs.info("Escribiendo el name");
-            find(firstNameInput).sendKeys(name);
+            type(firstNameInput, name);
         }
         if (!lastname.isEmpty()) { //si el lastname es vacio no se escribe
             Logs.info("Escribiendo el lastname");
-            find(lastNameInput).sendKeys(lastname);
+            type(lastNameInput, lastname);
         }
         if (!zipcode.isEmpty()) { //si el zipcode es vacio no se escribe
             Logs.info("Escribiendo el zipcode");
-            find(zipcodeInput).sendKeys(zipcode);
+            type(zipcodeInput, zipcode);
         }
 
         Logs.info("Haciendo click en el boton de continue");
-        find(continueButton).click();
+        click(continueButton);
     }
 
     public void verifyErrorMessage(String errorMessage) {
         Logs.info("Verificando el mensaje de error");
-        waitForDisplayed(errorLabel);   // primero espera a que aparezca
-
-        final var errorLabelElement = find(errorLabel);
+        final var errorLabelElement = waitForDisplayed(errorLabel);   // espera a que aparezca
 
         Assertions.assertAll(
                 () -> Assertions.assertTrue(errorLabelElement.isDisplayed()),

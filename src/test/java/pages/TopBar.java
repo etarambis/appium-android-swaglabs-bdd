@@ -33,7 +33,7 @@ public class TopBar extends BasePage {
 
     public void openBurgerMenu() {
         Logs.info("Abriendo el burger menu");
-        find(burgerButton).click();
+        click(burgerButton);
     }
 
 
@@ -47,7 +47,7 @@ public class TopBar extends BasePage {
 
     public void clickCheckout() {
         Logs.info("Haciendo click en checkout");
-        find(checkoutButton).click();
+        click(checkoutButton);
     }
 
 }

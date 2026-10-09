@@ -41,7 +41,7 @@ public class YourCartPage extends BasePage {
     public void clickCheckout() {
         Logs.info("Haciendo click en el boton de checkout");
         Gestures.swipeVertical(50, 80, 40, find(canvas));
-        find(checkoutButton).click();
+        click(checkoutButton);
     }
 
 

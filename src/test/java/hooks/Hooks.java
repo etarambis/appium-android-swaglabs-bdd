@@ -33,14 +33,19 @@ public class Hooks {
     @After
     public static void after(Scenario scenario) {
         Logs.info("after: %s, status: %s", scenario.getName(), scenario.getStatus());
-        switch (scenario.getStatus()) {
-            case SKIPPED, FAILED -> {
-                FileManager.getScreenshot(scenario.getName());
-                FileManager.getPageSource(scenario.getName());
-                FileManager.attachScreenshot(scenario);
-                FileManager.attachPageSource(scenario);
+        try {
+            switch (scenario.getStatus()) {
+                case SKIPPED, FAILED -> {
+                    // FileManager ignora (y registra) sus propios errores y la ausencia de driver
+                    FileManager.getScreenshot(scenario.getName());
+                    FileManager.getPageSource(scenario.getName());
+                    FileManager.attachScreenshot(scenario);
+                    FileManager.attachPageSource(scenario);
+                }
+                default -> { }
             }
+        } finally {
+            driverManager.killDriver();
         }
-        driverManager.killDriver();
     }
 }

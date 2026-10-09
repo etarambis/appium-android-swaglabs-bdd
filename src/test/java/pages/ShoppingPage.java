@@ -50,10 +50,10 @@ public class ShoppingPage extends BasePage {
 
     public void changeViewMode() {
         Logs.info("Cambiando a modo lista");
-        find(toggleViewButton).click();
+        click(toggleViewButton);
 
         Logs.info("Esperando que se ordene en formato lista");
-        sleep(1500);
+        waitForDisplayed(handleList);
     }
 
 
@@ -64,7 +64,11 @@ public class ShoppingPage extends BasePage {
         for (int i = 0; i < cantidad; i++) {
             final var handleListElements = findAll(handleList);
             final var originElement = handleListElements.get(0);
+            final var handlesBefore = handleListElements.size();
             Gestures.dragTo(originElement, destinyElement);
+
+            // espera a que el item arrastrado salga de la lista antes de tomar el siguiente
+            waitFor(driver -> driver.findElements(handleList).size() < handlesBefore);
         }
     }
 

@@ -5,6 +5,7 @@ import io.appium.java_client.android.nativekey.AndroidKey;
 import io.appium.java_client.android.nativekey.KeyEvent;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -12,7 +13,7 @@ import java.time.Duration;
 import java.util.List;
 
 public abstract class BasePage {
-    private final static int defaultTimeout = 20;
+    private final static int defaultTimeout = Config.getInt("timeout.default");
 
     private final int timeOut;
 
@@ -44,13 +45,36 @@ public abstract class BasePage {
         Logs.info("%s ha cargado satisfactoriamente", pageName);
     }
 
-    protected WebElement find(By locator) {
-        return getDriver().findElement(locator);
+    /**
+     * Espera una condicion arbitraria (hasta el timeout de la pagina) y devuelve su resultado.
+     */
+    protected <T> T waitFor(ExpectedCondition<T> condition) {
+        return new WebDriverWait(getDriver(), Duration.ofSeconds(timeOut)).until(condition);
     }
 
-    protected List<WebElement> findAll(By locator) {
-        return getDriver().findElements(locator);
+    /**
+     * Busca un elemento esperando a que exista en la pantalla (no exige que sea visible,
+     * para que {@code isDisplayed()} en las aserciones siga fallando como aserción).
+     */
+    protected WebElement find(By locator) {
+        return waitFor(ExpectedConditions.presenceOfElementLocated(locator));
     }
+
+    /**
+     * Busca elementos esperando a que exista al menos uno.
+     */
+    protected List<WebElement> findAll(By locator) {
+        return waitFor(ExpectedConditions.presenceOfAllElementsLocatedBy(locator));
+    }
+
+    protected void click(By locator) {
+        waitFor(ExpectedConditions.elementToBeClickable(locator)).click();
+    }
+
+    protected void type(By locator, String text) {
+        waitFor(ExpectedConditions.elementToBeClickable(locator)).sendKeys(text);
+    }
+
     public void pressBack() {
         Logs.info("Presionando atras en el dispositivo movil");
         getDriver().pressKey(new KeyEvent(AndroidKey.BACK));

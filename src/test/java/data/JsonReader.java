@@ -2,13 +2,14 @@ package data;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.CredentialJson;
+import utilities.Config;
 import utilities.Logs;
 
 import java.io.File;
 import java.io.IOException;
 
 public class JsonReader {
-    private static final String credentialPath = "src/test/resources/data/credenciales.json";
+    private static final String credentialPath = Config.get("credentials.file");
 
     public static CredentialJson getCredentialMap() {
         final var objectMapper = new ObjectMapper();
