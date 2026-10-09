@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class DataGiver {
     private static Map<String, Credential> getCredentialMap() {
-        return JsonReader.getCredentialMap().getMapCredentials();
+        return JsonReader.readCredentials().getMapCredentials();
     }
 
     public static Credential getValidCredentials() {

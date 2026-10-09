@@ -1,7 +1,6 @@
 package pages;
 
 import io.appium.java_client.AppiumBy;
-import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import utilities.BasePage;
 import utilities.Gestures;
@@ -23,28 +22,19 @@ public class ShoppingPage extends BasePage {
 
 
     @Override
-
     public void waitPageToLoad() {
-        waitPage(title, this.getClass().getSimpleName());
+        waitPage(title);
     }
 
     @Override
-
     public void verifyPage() {
         Logs.info("Verificando la pagina de Shopping");
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(find(title).isDisplayed()),
-                () -> Assertions.assertTrue(find(filterButton).isDisplayed()),
-                () -> Assertions.assertTrue(find(toggleViewButton).isDisplayed()),
-                () -> Assertions.assertTrue(find(itemList).isDisplayed())
-        );
+        verifyDisplayed(title, filterButton, toggleViewButton, itemList);
     }
 
     public void clickItemImage(int index) {
         Logs.info("Haciendo click en la imagen del item segun su index");
-        final var elements = findAll(imageList);
-        Logs.info("Cantidad de imagenes encontradas: " + elements.size()); // TEMPORAL
-        elements.get(index).click();
+        findAll(imageList).get(index).click();
     }
 
 
@@ -57,15 +47,19 @@ public class ShoppingPage extends BasePage {
     }
 
 
-    public void addToCartDrag(int cantidad) {
+    /**
+     * Agrega {@code itemCount} items al carrito arrastrando siempre el primer item visible de la lista
+     * hacia la zona del carrito (cada item arrastrado sale de la lista).
+     */
+    public void addToCartDrag(int itemCount) {
         Logs.info("Arrastrando el item hacia la barra para agregar al carrito segun cantidad");
-        final var destinyElement = find(dropZone);
+        final var destinationElement = find(dropZone);
 
-        for (int i = 0; i < cantidad; i++) {
+        for (int i = 0; i < itemCount; i++) {
             final var handleListElements = findAll(handleList);
             final var originElement = handleListElements.get(0);
             final var handlesBefore = handleListElements.size();
-            Gestures.dragTo(originElement, destinyElement);
+            Gestures.dragTo(originElement, destinationElement);
 
             // espera a que el item arrastrado salga de la lista antes de tomar el siguiente
             waitFor(driver -> driver.findElements(handleList).size() < handlesBefore);
@@ -73,6 +67,11 @@ public class ShoppingPage extends BasePage {
     }
 
 
+    /**
+     * Agrega al carrito tantos items como elementos tenga la lista.
+     * <b>Los valores de la lista (indices) no se usan</b>: solo cuenta su tamano, y se arrastran
+     * los primeros items visibles. Los features indican los indices por legibilidad.
+     */
     public void addToCartDrag(List<Integer> itemListAdd) {
         addToCartDrag(itemListAdd.size());
     }

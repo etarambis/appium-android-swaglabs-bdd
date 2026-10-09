@@ -19,7 +19,7 @@ public class YourCartStepDefinition {
     }
 
     @When("El usuario elimina el item con index {int} arrastrando de derecha a izquierda")
-    public void deletItemByIndex(int index) {
+    public void deleteItemByIndex(int index) {
 
         yourCartPage.deleteItemFromList(index);
     }

@@ -3,8 +3,6 @@ package utilities;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Formatter;
-
 public class Logs {
     private static final Logger LOG = LogManager.getLogger("AUTOMATION");
 
@@ -33,26 +31,26 @@ public class Logs {
     }
 
     public static void trace(String format, Object... args) {
-        LOG.trace(new Formatter().format(format, args).toString());
+        LOG.trace(String.format(format, args));
     }
 
     public static void debug(String format, Object... args) {
-        LOG.debug(new Formatter().format(format, args).toString());
+        LOG.debug(String.format(format, args));
     }
 
     public static void info(String format, Object... args) {
-        LOG.info(new Formatter().format(format, args).toString());
+        LOG.info(String.format(format, args));
     }
 
     public static void warning(String format, Object... args) {
-        LOG.warn(new Formatter().format(format, args).toString());
+        LOG.warn(String.format(format, args));
     }
 
     public static void error(String format, Object... args) {
-        LOG.error(new Formatter().format(format, args).toString());
+        LOG.error(String.format(format, args));
     }
 
     public static void fatal(String format, Object... args) {
-        LOG.fatal(new Formatter().format(format, args).toString());
+        LOG.fatal(String.format(format, args));
     }
 }

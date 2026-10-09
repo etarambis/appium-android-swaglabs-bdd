@@ -4,7 +4,6 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import pages.ItemDetailPage;
-import pages.LoginPage;
 import utilities.CommonFlows;
 
 public class ItemDetailStepDefinition {
@@ -23,6 +22,7 @@ public class ItemDetailStepDefinition {
     public void verifyItemDetailPage() {
 
         itemDetailPage.verifyPage();
+        itemDetailPage.verifyAddToCartAfterScroll();
     }
 
     @When("El usuario hace click en el boton Back to Products")

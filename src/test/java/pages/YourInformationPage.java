@@ -1,7 +1,6 @@
 package pages;
 
 import io.appium.java_client.AppiumBy;
-import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import utilities.BasePage;
 import utilities.Logs;
@@ -12,24 +11,16 @@ public class YourInformationPage extends BasePage {
     private final By lastNameInput = AppiumBy.accessibilityId("test-Last Name");
     private final By zipcodeInput = AppiumBy.accessibilityId("test-Zip/Postal Code");
     private final By continueButton = AppiumBy.accessibilityId("test-CONTINUE");
-    private final By errorLabel = AppiumBy.androidUIAutomator(
-            "description(\"test-Error message\").childSelector(className(\"android.widget.TextView\"))");
 
     @Override
     public void waitPageToLoad() {
-        waitPage(firstNameInput, this.getClass().getSimpleName());
+        waitPage(firstNameInput);
     }
 
     @Override
     public void verifyPage() {
         Logs.info("Verificando la pagina de your information page");
-
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(find(firstNameInput).isDisplayed()),
-                () -> Assertions.assertTrue(find(lastNameInput).isDisplayed()),
-                () -> Assertions.assertTrue(find(zipcodeInput).isDisplayed()),
-                () -> Assertions.assertTrue(find(continueButton).isDisplayed())
-        );
+        verifyDisplayed(firstNameInput, lastNameInput, zipcodeInput, continueButton);
     }
 
     public void fillData(String name, String lastname, String zipcode) {
@@ -51,13 +42,7 @@ public class YourInformationPage extends BasePage {
     }
 
     public void verifyErrorMessage(String errorMessage) {
-        Logs.info("Verificando el mensaje de error");
-        final var errorLabelElement = waitForDisplayed(errorLabel);   // espera a que aparezca
-
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(errorLabelElement.isDisplayed()),
-                () -> Assertions.assertEquals(errorMessage, errorLabelElement.getText())
-        );
+        verifyErrorMessage(ERROR_MESSAGE_LABEL, errorMessage);
     }
 
 }

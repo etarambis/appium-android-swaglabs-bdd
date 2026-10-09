@@ -124,7 +124,7 @@ public class Gestures {
                 getElementPointUsingPercentages(startPercentX, startPercentY, element);
         final var endPoint =
                 getElementPointUsingPercentages(endPercentX, endPercentY, element);
-        swipeGeneralPuntos(startPoint, endPoint);
+        swipeBetweenPoints(startPoint, endPoint);
     }
 
     public static void swipeHorizontal(
@@ -145,7 +145,7 @@ public class Gestures {
         swipeGeneral(percentX, startPercentY, percentX, endPercentY, element);
     }
 
-    private static void swipeGeneralPuntos(Point origin, Point destination) {
+    private static void swipeBetweenPoints(Point origin, Point destination) {
         Logs.debug("Haciendo swipe desde el punto %s hasta el punto %s", origin, destination);
         final var sequence = new Sequence(FINGER, 1);
 

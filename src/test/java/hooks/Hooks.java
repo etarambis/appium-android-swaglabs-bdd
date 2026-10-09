@@ -8,6 +8,7 @@ import io.cucumber.java.Scenario;
 import utilities.DriverManager;
 import utilities.Logs;
 import utilities.FileManager;
+import utilities.ReportAttachments;
 
 public class Hooks {
 
@@ -36,11 +37,11 @@ public class Hooks {
         try {
             switch (scenario.getStatus()) {
                 case SKIPPED, FAILED -> {
-                    // FileManager ignora (y registra) sus propios errores y la ausencia de driver
-                    FileManager.getScreenshot(scenario.getName());
-                    FileManager.getPageSource(scenario.getName());
-                    FileManager.attachScreenshot(scenario);
-                    FileManager.attachPageSource(scenario);
+                    // FileManager y ReportAttachments ignoran (y registran) sus errores y la ausencia de driver
+                    FileManager.saveScreenshot(scenario.getName());
+                    FileManager.savePageSource(scenario.getName());
+                    ReportAttachments.attachScreenshot(scenario);
+                    ReportAttachments.attachPageSource(scenario);
                 }
                 default -> { }
             }

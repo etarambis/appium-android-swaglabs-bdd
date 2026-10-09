@@ -1,6 +1,6 @@
 package utilities;
 
-public class Deeplinks {
+public class DeepLinks {
     private static final String ITEM_DETAIL = "swaglabs://swag-item/%d";
     private static final String SHOPPING = "swaglabs://swag-overview/%s";
 

@@ -16,7 +16,8 @@ public class CommonFlows {
         final var validCredentials = DataGiver.getValidCredentials();
 
         goToLoginPage();
-        new LoginPage().fillData(validCredentials.getUsername(), validCredentials.getPassword());
+        final var loginPage = new LoginPage();
+        loginPage.fillData(validCredentials.getUsername(), validCredentials.getPassword());
         new ShoppingPage().waitPageToLoad();
     }
 
@@ -24,7 +25,7 @@ public class CommonFlows {
     public void openBurgerMenu() {
         goToShoppingPage();
         new TopBar().openBurgerMenu();
-        new BurgerMenu().waitPageToLoad();
+        new BurgerMenuPage().waitPageToLoad();
     }
 
     public void goToYourCartPage(List<Integer> itemListAdd) {
@@ -32,7 +33,7 @@ public class CommonFlows {
         final var shoppingPage = new ShoppingPage();
         shoppingPage.changeViewMode();
         shoppingPage.addToCartDrag(itemListAdd);
-        new TopBar().clickCheckout();
+        new TopBar().clickCart();
         new YourCartPage().waitPageToLoad();
     }
 
