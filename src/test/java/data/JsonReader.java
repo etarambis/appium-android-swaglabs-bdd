@@ -17,7 +17,7 @@ public class JsonReader {
         try {
             return objectMapper.readValue(new File(CREDENTIAL_PATH), CredentialJson.class);
         } catch (IOException ioException) {
-            Logs.error("Error al leer del JSON: %s", ioException.getLocalizedMessage());
+            Logs.error("Error al leer del JSON", ioException);
             throw new RuntimeException(ioException.getLocalizedMessage());
         }
     }

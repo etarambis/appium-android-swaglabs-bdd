@@ -26,7 +26,7 @@ public class DriverManager {
                 driver.quit();
             }
         } catch (Exception exception) {
-            Logs.error("No se pudo cerrar el driver: %s", exception.getMessage());
+            Logs.error("No se pudo cerrar el driver", exception);
         } finally {
             new DriverProvider().remove();
         }
@@ -44,9 +44,16 @@ public class DriverManager {
             Logs.debug("Asignando el driver al driver provider");
             new DriverProvider().set(driver);
 
+            final var capabilities = driver.getCapabilities();
+            Logs.info("Sesion Appium creada: id=%s, dispositivo=%s, Android=%s, udid=%s",
+                    driver.getSessionId(),
+                    capabilities.getCapability("deviceName"),
+                    capabilities.getCapability("platformVersion"),
+                    capabilities.getCapability("deviceUDID"));
+
         } catch (MalformedURLException malformedURLException) {
 
-            Logs.error("Error al inicializar el DRIVER: %s", malformedURLException.getMessage());
+            Logs.error("Error al inicializar el DRIVER", malformedURLException);
             throw new RuntimeException(malformedURLException);
         }
     }

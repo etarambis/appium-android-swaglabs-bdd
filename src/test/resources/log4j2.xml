@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="WARN">
+    <Properties>
+        <!-- hilo, escenario en ejecucion (ThreadContext "scenario") y stack trace si lo hay -->
+        <Property name="pattern">%d{HH:mm:ss.SSS} %-5level [%t] [%X{scenario}] %logger{20} - %msg%n%throwable</Property>
+        <!-- Se puede cambiar con -Dlog.dir=... o la variable de entorno LOG_DIR (igual que config.properties) -->
+        <Property name="logDir">${sys:log.dir:-${env:LOG_DIR:-target/logs}}</Property>
+    </Properties>
+
+    <appenders>
+        <!-- Log global de toda la ejecucion (DEBUG y superior) -->
+        <File name="automation" fileName="${logDir}/automation.log" append="false">
+            <PatternLayout pattern="${pattern}" charset="UTF-8"/>
+        </File>
+
+        <!-- Un log por escenario: <logDir>/scenarios/<escenario>.log -->
+        <Routing name="scenarioLogs">
+            <Routes pattern="$${ctx:scenario:-no-scenario}">
+                <Route>
+                    <File name="scenario-${ctx:scenario:-no-scenario}"
+                          fileName="${logDir}/scenarios/${ctx:scenario:-no-scenario}.log" append="false">
+                        <PatternLayout pattern="${pattern}" charset="UTF-8"/>
+                    </File>
+                </Route>
+            </Routes>
+        </Routing>
+    </appenders>
+
+    <loggers>
+        <root level="debug">
+            <appender-ref ref="automation"/>
+            <appender-ref ref="scenarioLogs"/>
+        </root>
+    </loggers>
+</configuration>

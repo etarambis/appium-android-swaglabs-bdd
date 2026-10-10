@@ -16,6 +16,19 @@ public class FileManager {
 
     private static final String SCREENSHOTS_PATH = Config.get("evidence.screenshots.dir");
     private static final String PAGE_SOURCE_PATH = Config.get("evidence.pagesource.dir");
+    private static final int MAX_NAME_LENGTH = 80;
+
+    /**
+     * Nombre unico y seguro para archivos de un escenario: nombre saneado + linea del feature.
+     * La linea evita que las filas de un Scenario Outline (mismo nombre) se pisen entre si.
+     */
+    public static String safeName(String scenarioName, int line) {
+        var name = scenarioName.replaceAll("[^\\p{L}\\p{Nd}_-]+", "_").replaceAll("^_+|_+$", "");
+        if (name.length() > MAX_NAME_LENGTH) {
+            name = name.substring(0, MAX_NAME_LENGTH);
+        }
+        return String.format("%s_L%d", name, line);
+    }
 
     // La evidencia es secundaria: si falla, se registra y NO se lanza excepcion,
     // para no ocultar el error real del escenario.
@@ -34,8 +47,9 @@ public class FileManager {
         try {
             final var screenshotFile = driver.getScreenshotAs(OutputType.FILE);
             FileUtils.copyFile(screenshotFile, new File(path));
+            Logs.info("Screenshot guardado en: %s", path);
         } catch (Exception exception) {
-            Logs.error("Error al guardar el screenshot: %s", exception.getLocalizedMessage());
+            Logs.error("Error al guardar el screenshot", exception);
         }
     }
 
@@ -58,8 +72,9 @@ public class FileManager {
             }
             // writeStringToFile crea los directorios padres si no existen
             FileUtils.writeStringToFile(new File(path), Jsoup.parse(pageSource).toString(), StandardCharsets.UTF_8);
+            Logs.info("Page source guardado en: %s", path);
         } catch (Exception exception) {
-            Logs.error("Error al tomar el page source: %s", exception.getLocalizedMessage());
+            Logs.error("Error al tomar el page source", exception);
         }
     }
 
@@ -70,7 +85,7 @@ public class FileManager {
             FileUtils.deleteDirectory(new File(SCREENSHOTS_PATH));
             FileUtils.deleteDirectory(new File(PAGE_SOURCE_PATH));
         } catch (IOException ioException) {
-            Logs.error("Error al eliminar los screenshots previos: %s", ioException.getLocalizedMessage());
+            Logs.error("Error al eliminar los screenshots previos", ioException);
             throw new RuntimeException(ioException);
         }
 

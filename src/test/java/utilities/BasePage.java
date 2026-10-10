@@ -7,6 +7,7 @@ import io.appium.java_client.android.nativekey.KeyEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -41,9 +42,21 @@ public abstract class BasePage {
         return new DriverProvider().get();
     }
 
+    /**
+     * Espera una condicion y, si vence el tiempo, deja en el log que se esperaba y cuanto antes de relanzar el error.
+     */
+    private <T> T until(ExpectedCondition<T> condition, int seconds) {
+        try {
+            return new WebDriverWait(getDriver(), Duration.ofSeconds(seconds)).until(condition);
+        } catch (TimeoutException timeoutException) {
+            Logs.error("Timeout de %d s esperando: %s", seconds, condition);
+            throw timeoutException;
+        }
+    }
+
     protected WebElement waitForDisplayed(By locator, int time) {
-        final var wait = new WebDriverWait(getDriver(), Duration.ofSeconds(time));
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        Logs.debug("Esperando que se muestre: %s", locator);
+        return until(ExpectedConditions.visibilityOfElementLocated(locator), time);
     }
 
     protected WebElement waitForDisplayed(By locator) {
@@ -67,7 +80,7 @@ public abstract class BasePage {
      * Espera una condicion arbitraria (hasta el timeout de la pagina) y devuelve su resultado.
      */
     protected <T> T waitFor(ExpectedCondition<T> condition) {
-        return new WebDriverWait(getDriver(), Duration.ofSeconds(timeOut)).until(condition);
+        return until(condition, timeOut);
     }
 
     /**
@@ -75,6 +88,7 @@ public abstract class BasePage {
      * para que {@code isDisplayed()} en las aserciones siga fallando como aserción).
      */
     protected WebElement find(By locator) {
+        Logs.debug("Buscando elemento: %s", locator);
         return waitFor(ExpectedConditions.presenceOfElementLocated(locator));
     }
 
@@ -82,14 +96,18 @@ public abstract class BasePage {
      * Busca elementos esperando a que exista al menos uno.
      */
     protected List<WebElement> findAll(By locator) {
+        Logs.debug("Buscando elementos: %s", locator);
         return waitFor(ExpectedConditions.presenceOfAllElementsLocatedBy(locator));
     }
 
     protected void click(By locator) {
+        Logs.debug("Click en: %s", locator);
         waitFor(ExpectedConditions.elementToBeClickable(locator)).click();
     }
 
     protected void type(By locator, String text) {
+        // no se registra el texto: puede ser una contrasena
+        Logs.debug("Escribiendo %d caracteres en: %s", text.length(), locator);
         waitFor(ExpectedConditions.elementToBeClickable(locator)).sendKeys(text);
     }
 
