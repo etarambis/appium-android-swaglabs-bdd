@@ -26,6 +26,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
+                    <!-- Los fallos NO detienen Surefire para que el plugin de reporte genere el HTML;
+                         luego checkBuildResult (mas abajo) hace fallar el build si hubo escenarios fallidos -->
                     <testFailureIgnore>true</testFailureIgnore>
                     <properties>
                         <configurationParameters>
@@ -62,8 +64,8 @@
                             <mergeFeaturesById>false</mergeFeaturesById>
                             <!-- optional, set true to get a final report with latest results of the same test from different test runs -->
                             <mergeFeaturesWithRetest>false</mergeFeaturesWithRetest>
-                            <!-- optional, set true to fail build on test failures -->
-                            <checkBuildResult>false</checkBuildResult>
+                            <!-- genera el reporte y despues falla el build si hay escenarios fallidos -->
+                            <checkBuildResult>true</checkBuildResult>
                         </configuration>
                     </execution>
                 </executions>

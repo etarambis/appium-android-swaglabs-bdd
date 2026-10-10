@@ -68,7 +68,7 @@ Antes de ejecutar, deja listos estos dos puntos:
 
 **Desde IntelliJ IDEA:** ejecuta el archivo `.feature` (o la carpeta `features`) con el glue `hooks steps` y el directorio de trabajo en la raíz del proyecto (las rutas de `config.properties` son relativas a ella). El log por step (`hooks.StepLogger`) se activa con la propiedad `cucumber.plugin` de `junit-platform.properties`; si ejecutas con el runner propio de IntelliJ, agrega `--plugin hooks.StepLogger` a los argumentos del programa. El resto de logs y evidencias funciona igual.
 
-> **Importante:** el `pom.xml` mantiene `testFailureIgnore=true`. El build termina en `BUILD SUCCESS` aunque falle una prueba. Revisa siempre el reporte o la línea `Tests run: ..., Failures: ...`.
+> **Resultado del build:** si algún escenario falla, el build termina en `BUILD FAILURE` (código de salida distinto de 0) **después** de generar el reporte HTML. Surefire usa `testFailureIgnore=true` a propósito, para que el plugin del reporte llegue a ejecutarse, y es `checkBuildResult=true` de ese plugin el que hace fallar el build. No cambies `testFailureIgnore` a `false`: dejarías de obtener el reporte justo cuando hay fallos.
 
 ## 4. Configuración
 
@@ -183,7 +183,7 @@ Convenciones: clases de páginas terminan en `Page`, las de steps en `StepDefini
 | `Connection error (POST http://127.0.0.1:4723/session)` | Appium no está corriendo o la URL es otra | Inicia `appium` y revisa `…/status`; si usas otro host, `-Dappium.url=...` |
 | La sesión no se crea o tarda mucho | Emulador apagado, `offline`, o lento | `adb devices` debe mostrar `device`; reinicia el emulador. Sube `timeout.uiautomator2.launch` si hace falta |
 | `TimeoutException ... esperando` | El elemento no apareció en 20 s (emulador cargado, pantalla distinta o locator cambiado) | Revisa el log del escenario y el page source adjunto. Sube `-Dtimeout.default=30` si es solo lentitud |
-| `BUILD SUCCESS` pero hay pruebas fallidas | `testFailureIgnore=true` en el `pom.xml` | Revisa `Tests run: …, Failures: …` o el reporte HTML |
+| `BUILD FAILURE` con `Error Found:: BUILD FAILED - Check Report For Details` | Hay al menos un escenario fallido (es lo esperado) | Abre el reporte (`./openReport.sh`) y el log del escenario fallido |
 | `Tests run: 0` pese a que los escenarios corren | Surefire 3.5.x no cuenta bien el motor de Cucumber con JUnit 6 | Mantén Surefire en 3.2.5 (versión actual del `pom.xml`) |
 | `bad interpreter` o `\r: command not found` al ejecutar un `.sh` | Fin de línea CRLF en un script | El `.gitattributes` fuerza LF para `.sh` y `mvnw`; vuelve a clonar o ejecuta `git add --renormalize .` |
 | No se encuentra `adb` | El SDK no está en el `PATH` | Agrega `platform-tools` al `PATH` o configura `ANDROID_HOME` |
