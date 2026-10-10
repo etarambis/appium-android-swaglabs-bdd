@@ -10,44 +10,39 @@ import utilities.Logs;
 
 public class TopBar extends BasePage {
     private final By burgerButton = AppiumBy.accessibilityId("test-Menu");
-    private final By checkoutButton = AppiumBy.accessibilityId("test-Cart");
+    private final By cartButton = AppiumBy.accessibilityId("test-Cart");
     private final By itemCartCountLabel = AppiumBy.androidUIAutomator(
             "new UiSelector().description(\"test-Cart\").childSelector(new UiSelector().className(\"android.widget.TextView\"))");
 
     @Override
     public void waitPageToLoad() {
-        // TODO document why this method is empty
+        waitPage(burgerButton);
     }
 
     @Override
-
     public void verifyPage() {
         Logs.info("Verificando la barra superior");
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(find(burgerButton).isDisplayed()),
-                () -> Assertions.assertTrue(find(checkoutButton).isDisplayed())
-
-        );
+        verifyDisplayed(burgerButton, cartButton);
     }
 
 
     public void openBurgerMenu() {
         Logs.info("Abriendo el burger menu");
-        find(burgerButton).click();
+        click(burgerButton);
     }
 
 
     public void verifyItemCount(int expected) {
         Logs.info("Verificando la cantidad de items en el carrito: %d", expected);
 
-        Assertions.assertEquals(Integer.parseInt(find(itemCartCountLabel).getText()), expected);
+        Assertions.assertEquals(expected, Integer.parseInt(find(itemCartCountLabel).getText()));
 
     }
 
 
-    public void clickCheckout() {
-        Logs.info("Haciendo click en checkout");
-        find(checkoutButton).click();
+    public void clickCart() {
+        Logs.info("Haciendo click en el carrito");
+        click(cartButton);
     }
 
 }

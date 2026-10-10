@@ -7,7 +7,7 @@ import pages.LoginPage;
 import pages.ShoppingPage;
 import utilities.CommonFlows;
 
-public class LoginStepDefinitions {
+public class LoginStepDefinition {
 
     private final CommonFlows commonFlows = new CommonFlows();
     private final LoginPage loginPage = new LoginPage();

@@ -3,18 +3,18 @@ package steps;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import pages.BurgerMenu;
+import pages.BurgerMenuPage;
 import pages.LoginPage;
 import utilities.CommonFlows;
 
 public class BurgerMenuStepDefinition {
 
     private final CommonFlows commonFlows = new CommonFlows();
-    private final BurgerMenu burgerMenu = new BurgerMenu();
+    private final BurgerMenuPage burgerMenu = new BurgerMenuPage();
     private final LoginPage loginPage = new LoginPage();
 
     @Given("El usuario abre el Burger Menu")
-    public void openBurguerMenu() {
+    public void openBurgerMenu() {
         commonFlows.openBurgerMenu();
     }
 
@@ -24,13 +24,13 @@ public class BurgerMenuStepDefinition {
     }
 
     @Then("Se debe redirigir a la pagina de Login")
-    public void verifyNavigateLopginPAGE() {
+    public void verifyLoginPageIsShown() {
         loginPage.waitPageToLoad();
         loginPage.verifyPage();
     }
 
     @When("El usuario hace click en la X")
-    public void ClickX() {
+    public void clickClose() {
         burgerMenu.clickCloseX();
 
     }

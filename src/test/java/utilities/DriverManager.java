@@ -26,14 +26,16 @@ public class DriverManager {
                 driver.quit();
             }
         } catch (Exception exception) {
-            Logs.error("No se pudo cerrar el driver: %s", exception.getMessage());
+            Logs.error("No se pudo cerrar el driver", exception);
+        } finally {
+            new DriverProvider().remove();
         }
     }
 
     private void buildLocalDriver(){
         try {
 
-            final var appiumUrl = "http://127.0.0.1:4723/";
+            final var appiumUrl = Config.get("appium.url");
             final var desiredCapabilities = getDesiredLocalCapabilities();
 
             Logs.debug("Inicializando el DRIVER");
@@ -42,32 +44,40 @@ public class DriverManager {
             Logs.debug("Asignando el driver al driver provider");
             new DriverProvider().set(driver);
 
+            final var capabilities = driver.getCapabilities();
+            Logs.info("Sesion Appium creada: id=%s, dispositivo=%s, Android=%s, udid=%s",
+                    driver.getSessionId(),
+                    capabilities.getCapability("deviceName"),
+                    capabilities.getCapability("platformVersion"),
+                    capabilities.getCapability("deviceUDID"));
+
         } catch (MalformedURLException malformedURLException) {
 
-            Logs.error("Error al inicializar el DRIVER: %s", malformedURLException.getMessage());
+            Logs.error("Error al inicializar el DRIVER", malformedURLException);
             throw new RuntimeException(malformedURLException);
         }
     }
 
     private void buildRemoteDriver(){
-
+        throw new UnsupportedOperationException(
+                "El modo remoto (variable JOB_NAME definida) aun no esta implementado en DriverManager.buildRemoteDriver()");
     }
 
     private static DesiredCapabilities getDesiredLocalCapabilities() {
 
         final var desiredCapabilities = new DesiredCapabilities();
 
-        final var fileAPK = new File("src/test/resources/apk/sauceLabs.apk");
+        final var fileAPK = new File(Config.get("app.path"));
 
         desiredCapabilities.setCapability("platformName", "Android");
         desiredCapabilities.setCapability("appium:automationName", "UiAutomator2");
         desiredCapabilities.setCapability("appium:app", fileAPK.getAbsolutePath());
-        desiredCapabilities.setCapability("appium:appWaitActivity", "com.swaglabsmobileapp.MainActivity");
+        desiredCapabilities.setCapability("appium:appWaitActivity", Config.get("app.wait.activity"));
         desiredCapabilities.setCapability("appium:autoGrantPermissions", true);
 
         // Más tiempo para emuladores lentos
-        desiredCapabilities.setCapability("appium:adbExecTimeout", 60000);
-        desiredCapabilities.setCapability("appium:uiautomator2ServerLaunchTimeout", 90000);
+        desiredCapabilities.setCapability("appium:adbExecTimeout", Config.getInt("timeout.adb.exec"));
+        desiredCapabilities.setCapability("appium:uiautomator2ServerLaunchTimeout", Config.getInt("timeout.uiautomator2.launch"));
 
         return desiredCapabilities;
     }

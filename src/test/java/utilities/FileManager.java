@@ -4,58 +4,77 @@ package utilities;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import io.cucumber.java.Scenario;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
+/**
+ * Guarda y borra la evidencia en disco. Adjuntar al reporte es responsabilidad de {@link ReportAttachments}.
+ */
 public class FileManager {
 
-    private static final String screenshotsPath = "src/test/resources/screenshots/";
-    private static final String pageSourcePath  = "src/test/resources/pageStructure/";
+    private static final String SCREENSHOTS_PATH = Config.get("evidence.screenshots.dir");
+    private static final String PAGE_SOURCE_PATH = Config.get("evidence.pagesource.dir");
+    private static final int MAX_NAME_LENGTH = 80;
 
-
-    public static void getScreenshot(String screenshotName) {
-        Logs.debug("Tomando screenshot: " + screenshotName);
-
-        final var screenshotFile = ((TakesScreenshot) new DriverProvider().get())
-                .getScreenshotAs(OutputType.FILE);
-
-        final var path = String.format("%s/%s.png", screenshotsPath, screenshotName);
-
-        try {
-            FileUtils.copyFile(screenshotFile, new File(path));
-        } catch (IOException ioExeption) {
-            Logs.error("Error al guardar el screenshot: %s", ioExeption.getLocalizedMessage());
-            throw new RuntimeException(ioExeption);
+    /**
+     * Nombre unico y seguro para archivos de un escenario: nombre saneado + linea del feature.
+     * La linea evita que las filas de un Scenario Outline (mismo nombre) se pisen entre si.
+     */
+    public static String safeName(String scenarioName, int line) {
+        var name = scenarioName.replaceAll("[^\\p{L}\\p{Nd}_-]+", "_").replaceAll("^_+|_+$", "");
+        if (name.length() > MAX_NAME_LENGTH) {
+            name = name.substring(0, MAX_NAME_LENGTH);
         }
-
+        return String.format("%s_L%d", name, line);
     }
 
-    public static void getPageSource(String fileName) {
-        Logs.debug("Guardando estructura de la página: " + fileName);
-        final var path = String.format("%s/%s.xml", pageSourcePath, fileName);
+    // La evidencia es secundaria: si falla, se registra y NO se lanza excepcion,
+    // para no ocultar el error real del escenario.
+
+    public static void saveScreenshot(String screenshotName) {
+        Logs.debug("Tomando screenshot: " + screenshotName);
+
+        final var driver = new DriverProvider().get();
+        if (driver == null) {
+            Logs.warning("No hay driver activo, no se puede tomar el screenshot");
+            return;
+        }
+
+        final var path = String.format("%s/%s.png", SCREENSHOTS_PATH, screenshotName);
 
         try {
-            final var file = new File(path);
-            Logs.debug("Creando los directorios padres si es que no existen ");
-            if (file.getParentFile().mkdir()) {
-                final var fileWriter = new FileWriter(file);
-                final var pageSource = new DriverProvider().get().getPageSource();
+            final var screenshotFile = driver.getScreenshotAs(OutputType.FILE);
+            FileUtils.copyFile(screenshotFile, new File(path));
+            Logs.info("Screenshot guardado en: %s", path);
+        } catch (Exception exception) {
+            Logs.error("Error al guardar el screenshot", exception);
+        }
+    }
 
-                if (pageSource != null) {
-                    fileWriter.write(Jsoup.parse(pageSource).toString());
-                }
-                fileWriter.close();
+    public static void savePageSource(String fileName) {
+        Logs.debug("Guardando estructura de la página: " + fileName);
+
+        final var driver = new DriverProvider().get();
+        if (driver == null) {
+            Logs.warning("No hay driver activo, no se puede guardar el page source");
+            return;
+        }
+
+        final var path = String.format("%s/%s.xml", PAGE_SOURCE_PATH, fileName);
+
+        try {
+            final var pageSource = driver.getPageSource();
+            if (pageSource == null) {
+                Logs.warning("El page source llego vacio, no se guarda el archivo");
+                return;
             }
-
-        } catch (IOException ioException) {
-
-            Logs.error("Error al tomar el page source: %s", ioException.getLocalizedMessage());
-            throw new RuntimeException(ioException);
-
+            // writeStringToFile crea los directorios padres si no existen
+            FileUtils.writeStringToFile(new File(path), Jsoup.parse(pageSource).toString(), StandardCharsets.UTF_8);
+            Logs.info("Page source guardado en: %s", path);
+        } catch (Exception exception) {
+            Logs.error("Error al tomar el page source", exception);
         }
     }
 
@@ -63,34 +82,12 @@ public class FileManager {
 
         try {
             Logs.debug("Eliminando screenshots previos");
-            FileUtils.deleteDirectory(new File(screenshotsPath));
-            FileUtils.deleteDirectory(new File(pageSourcePath));
+            FileUtils.deleteDirectory(new File(SCREENSHOTS_PATH));
+            FileUtils.deleteDirectory(new File(PAGE_SOURCE_PATH));
         } catch (IOException ioException) {
-            Logs.error("Error al eliminar los screenshots previos: %s", ioException.getLocalizedMessage());
+            Logs.error("Error al eliminar los screenshots previos", ioException);
             throw new RuntimeException(ioException);
         }
 
-    }
-
-    public static void attachScreenshot(Scenario scenario) {
-        final var screenshotFile = ((TakesScreenshot) new DriverProvider().get())
-                .getScreenshotAs(OutputType.BYTES);
-
-        scenario.attach(
-                screenshotFile,
-                "image/png",
-                scenario.getName()
-        );
-    }
-
-    public static void attachPageSource(Scenario scenario) {
-        final var pageSource = new DriverProvider().get().getPageSource();
-        final var parsedPageSource = Jsoup.parse(pageSource).toString();
-
-        scenario.attach(
-                parsedPageSource,
-                "text/plain",
-                scenario.getName()
-        );
     }
 }

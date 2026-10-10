@@ -14,13 +14,13 @@ public class YourInformationStepDefinition {
     private final YourInformationPage yourInformationPage = new YourInformationPage();
 
     @Given("El usuario navega a Your Information agregando al carrito items con indices:")
-    public void goToInformationCart(List<Integer> listInteger) {
+    public void goToYourInformation(List<Integer> listInteger) {
 
         commonFlows.goToYourInformationPage(listInteger);
     }
 
     @When("El usuario escribe el {string}, {string}, {string} y presiona el boton de Continue")
-    public void userBotonContinue(String name, String lastName, String zipCode) {
+    public void fillInformationAndContinue(String name, String lastName, String zipCode) {
 
         yourInformationPage.fillData(name, lastName, zipCode);
     }
